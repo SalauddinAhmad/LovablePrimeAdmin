@@ -187,14 +187,14 @@ function renderTable(records) {
       <td>${deviceDisplay}</td>
       <td>
         <div class="action-group">
-          <button class="btn-secondary" onclick="toggleActive('\ ${license.id}\ ', ${license.is_active})">
+          <button class="btn-secondary" onclick="toggleActive('${license.id}', ${license.is_active})">
             ${license.is_active ? 'Deactivate' : 'Activate'}
           </button>
-          <button class="btn-secondary" onclick="resetDevices('\ ${license.id}\ ')">Reset</button>
-          <button class="btn-danger" onclick="deleteLicense('\ ${license.id}\ ', '\ ${license.key_value}\ ')">Delete</button>
+          <button class="btn-secondary" onclick="resetDevices('${license.id}')">Reset</button>
+          <button class="btn-danger" onclick="deleteLicense('${license.id}', '${license.key_value}')">Delete</button>
         </div>
       </td>
-    `.replace(/\\\s/g, '').replace(/\s\s+/g, ' ');
+    `.replace(/\s\s+/g, ' ');
     tbody.appendChild(tr);
   });
 }
