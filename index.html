@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lovable Prime - Licensing Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Login Password Gate Overlay -->
+  <div id="loginGate" class="login-gate-overlay">
+    <div class="login-gate-card">
+      <img src="logo.png" alt="Lovable Prime Logo" class="login-gate-logo">
+      <h2>LOVABLE PRIME</h2>
+      <p>Enter Administrator Password to unlock portal</p>
+      <div class="form-group" style="width: 100%; margin-top: 20px;">
+        <input type="password" id="gatePassword" placeholder="Enter admin password..." onkeydown="if(event.key === 'Enter') checkGatePassword()">
+      </div>
+      <button onclick="checkGatePassword()" style="width: 100%; margin-top: 15px; padding: 12px;">Unlock Portal</button>
+      <p id="gateError" style="color: var(--error); font-size: 12px; margin-top: 12px; font-weight: 600;"></p>
+    </div>
+  </div>
+
+<div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <img src="logo.png" alt="Lovable Prime Logo" class="brand-logo">
+        <div class="brand-text">
+          <span class="brand-name">LOVABLE</span>
+          <span class="brand-sub">PRIME</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a href="#" class="menu-item active" data-tab="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Dashboard
+        </a>
+        <a href="#" class="menu-item" data-tab="generator">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+          Key Generator
+        </a>
+        <a href="#" class="menu-item" data-tab="database">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"></path></svg>
+          Active Licenses
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="status-indicator online"></span>
+        <span class="status-text">Server Status: Online</span>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="top-bar">
+        <div class="search-bar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="searchKeys" placeholder="Search licenses by key value..." oninput="filterLicenses()">
+        </div>
+        <div class="connection-status" id="connectionStatus">
+          <span class="indicator error"></span> Not Connected
+        </div>
+      </header>
+
+      <div class="scroll-container">
+        <!-- Dashboard Tab -->
+        <section id="tab-dashboard" class="tab-content active">
+          <!-- Statistics Grid -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-icon cyan">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Total Licenses</span>
+                <span class="stat-value" id="statTotal">0</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon emerald">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Active Keys</span>
+                <span class="stat-value" id="statActive">0</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon rose">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14l2-2 2 2m0-4l-2 2-2-2m5-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Inactive / Expired</span>
+                <span class="stat-value" id="statInactive">0</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon violet">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Registered Devices</span>
+                <span class="stat-value" id="statDevices">0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-panels">
+            <!-- Configuration Card -->
+            <div class="card card-config">
+              <h3>🔑 Supabase Credentials</h3>
+              <p class="card-desc">Enter your Supabase credentials to access and manage keys.</p>
+              <div class="form-grid">
+                <div class="form-group full-width">
+                  <label>Supabase Project URL</label>
+                  <input type="text" id="dbUrl" value="https://mlifxjsdxqqsvqhleuyk.supabase.co" placeholder="https://xxxx.supabase.co">
+                </div>
+                <div class="form-group full-width">
+                  <label>Service Role Key (Secret Key)</label>
+                  <input type="password" id="dbKey" value="sb_publishable_Rn7jY_ZE7CclLT-EjASBIQ_He9cKBkp" placeholder="Paste your service_role key here">
+                </div>
+                <div class="form-actions">
+                  <button id="connectBtn" onclick="loadLicenses()">Connect Database</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Stats Visual / Instructions -->
+            <div class="card card-info">
+              <h3>🚀 Lovable Prime Portal</h3>
+              <p class="card-desc">This panel manages licenses for the Lovable Prime Chrome Extension.</p>
+              <div class="info-list">
+                <div class="info-item">
+                  <span class="bullet"></span>
+                  <p><strong>Device Lock:</strong> Licenses dynamically lock to client browser profiles on first login.</p>
+                </div>
+                <div class="info-item">
+                  <span class="bullet"></span>
+                  <p><strong>Database Safety:</strong> Connections are direct from your browser to Supabase REST API.</p>
+                </div>
+                <div class="info-item">
+                  <span class="bullet"></span>
+                  <p><strong>Deactivation:</strong> Instantly revoke keys in case of abuse or key resale.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Generator Tab -->
+        <section id="tab-generator" class="tab-content">
+          <div class="card max-width-600">
+            <h3>⚡ Generate New License</h3>
+            <p class="card-desc">Create secure keys with customized expiry dates and device limits.</p>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Key Identifier / Prefix</label>
+                <input type="text" id="keyPrefix" value="PRIME" placeholder="e.g. PRIME">
+              </div>
+              <div class="form-group">
+                <label>Validity Duration</label>
+                <select id="keyDuration" onchange="calculateExpiry()">
+                  <option value="1h">1 Hour (Trial)</option>
+                  <option value="1d">1 Day (Trial)</option>
+                  <option value="1w">1 Week (Trial)</option>
+                  <option value="1">1 Month</option>
+                  <option value="3">3 Months</option>
+                  <option value="6">6 Months</option>
+                  <option value="12" selected>1 Year</option>
+                  <option value="120">10 Years</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Manual Expiration Date</label>
+                <input type="date" id="keyExpiry">
+              </div>
+              <div class="form-group">
+                <label>Max Devices Allowed</label>
+                <input type="number" id="maxDevices" value="1" min="1">
+              </div>
+              <div class="form-actions full-width">
+                <button class="btn-primary" onclick="generateLicense()">Generate & Save Key</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Database List Tab -->
+        <section id="tab-database" class="tab-content">
+          <div class="card">
+            <div class="card-header-actions">
+              <h3>📋 Active Database Records</h3>
+              <button class="btn-secondary" onclick="loadLicenses()">Refresh Table</button>
+            </div>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>License Key</th>
+                    <th>Status</th>
+                    <th>Expiration</th>
+                    <th>Devices Limit</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="licenseTableBody">
+                  <tr>
+                    <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px 0;">Please connect to your Supabase Database first.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast-notification"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
