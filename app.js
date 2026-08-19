@@ -141,6 +141,12 @@ async function loadLicenses() {
   dbRecords = list;
   renderTable(dbRecords);
   updateMetrics(dbRecords);
+  
+  // Load telemetry logs
+  loadLogs();
+  if (!logsInterval) {
+    logsInterval = setInterval(loadLogs, 8000); // Auto refresh logs every 8 seconds
+  }
 }
 
 // Render Licenses in Table
@@ -307,6 +313,64 @@ async function deleteLicense(id, keyVal) {
   loadLicenses();
 }
 
+
+// Load Live Telemetry Logs
+let logsInterval;
+async function loadLogs() {
+  const logs = await supabaseRequest('usage_logs?select=*&order=created_at.desc&limit=50');
+  if (!logs) return;
+  
+  renderLogs(logs);
+}
+
+function renderLogs(logs) {
+  const container = document.getElementById('logFeedContainer');
+  container.innerHTML = '';
+  
+  if (logs.length === 0) {
+    container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 30px 0;">No activity logs found. Use the extension to populate logs!</div>`;
+    return;
+  }
+  
+  logs.forEach(log => {
+    const timeFormatted = new Date(log.created_at).toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }) + ' (' + new Date(log.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ')';
+    
+    let actionClass = 'action-login';
+    if (log.action_type === 'Download Code') actionClass = 'action-download';
+    if (log.action_type === 'Remove Watermark') actionClass = 'action-watermark';
+    
+    let detailText = '';
+    if (log.action_type === 'Login') {
+      detailText = `Logged in from device`;
+    } else if (log.action_type === 'Download Code') {
+      detailText = `Downloaded ZIP for project <strong>${log.project_name || 'Unknown'}</strong>`;
+    } else if (log.action_type === 'Remove Watermark') {
+      detailText = `Removed watermark on project <strong>${log.project_name || 'Unknown'}</strong>`;
+    }
+    
+    const div = document.createElement('div');
+    div.className = 'log-item';
+    div.innerHTML = `
+      <div class="log-left">
+        <span class="log-action-badge ${actionClass}">${log.action_type}</span>
+        <div class="log-details">
+          <span class="log-main-text"><span class="key-badge" style="padding: 2px 6px; font-size:11px;">${log.license_key}</span> ${detailText}</span>
+          <span class="log-sub-text">Lovable Account: <strong>${log.lovable_email || 'Not Logged In'}</strong></span>
+        </div>
+      </div>
+      <div class="log-right">
+        <span class="log-ip">${log.ip_address || 'Unknown IP'}</span>
+        <span class="log-time">${timeFormatted}</span>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
 // Password Gate Check
 const CORRECT_HASH = '8f204fdbc685236a374d5982e70c601df74de0e5e5e175474b9dfee2322df39f';
 
@@ -342,6 +406,7 @@ async function checkGatePassword() {
 // Logout Admin
 function logoutAdmin() {
   if (confirm('Logout from Admin Portal?')) {
+    if (logsInterval) clearInterval(logsInterval);
     sessionStorage.removeItem('gate_unlocked');
     window.location.reload();
   }
