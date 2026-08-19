@@ -1,20 +1,7 @@
 // Global State Store
 let dbRecords = [];
 
-// Tab System
-document.querySelectorAll('.menu-item').forEach(item => {
-  item.addEventListener('click', (e) => {
-    e.preventDefault();
-    document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    
-    item.classList.add('active');
-    const tabId = item.getAttribute('data-tab');
-    document.getElementById(`tab-${tabId}`).classList.add('active');
-  });
-});
-
-// Expiry date calculation (Trial & Standard durations)
+// Expiry date calculation
 function calculateExpiry() {
   const durationVal = document.getElementById('keyDuration').value;
   const date = new Date();
@@ -34,11 +21,11 @@ function calculateExpiry() {
   const mm = String(date.getMonth() + 1).padStart(2, '0');
   const dd = String(date.getDate()).padStart(2, '0');
   
-  document.getElementById('keyExpiry').value = `${yyyy}-${mm}-${dd}`;
+  document.getElementById('keyExpiry').value = `${yyyy}-\ ${mm}-\ ${dd}`.replace(/\s/g, '');
 }
 calculateExpiry();
 
-// Show Toast
+// Show Toast Notification
 function showToast(message, type = 'success') {
   const toast = document.getElementById('toast');
   toast.textContent = message;
@@ -48,16 +35,20 @@ function showToast(message, type = 'success') {
   }, 3500);
 }
 
-// Load cached credentials or default key on launch
+// Load cached credentials on launch
 window.onload = () => {
   const cachedKey = localStorage.getItem('prime_service_role_key');
-  if (cachedKey && cachedKey.trim() !== '') {
+  if (cachedKey) {
     document.getElementById('dbKey').value = cachedKey;
   }
-  // Auto connect if key is present
-  const currentKey = document.getElementById('dbKey').value;
-  if (currentKey && currentKey.trim() !== '') {
-    loadLicenses();
+  // Auto connect if password gate is unlocked
+  if (sessionStorage.getItem('gate_unlocked') === 'true') {
+    const gate = document.getElementById('loginGate');
+    if (gate) gate.style.display = 'none';
+    
+    if (document.getElementById('dbKey').value) {
+      loadLicenses();
+    }
   }
 };
 
@@ -67,7 +58,7 @@ async function supabaseRequest(endpoint, method = 'GET', body = null) {
   const key = document.getElementById('dbKey').value.trim();
 
   if (!url || !key) {
-    showToast('Credentials required! Enter Supabase URL and service_role Key.', 'error');
+    showToast('Credentials required! Enter Supabase URL and key.', 'error');
     updateConnectionStatus(false);
     return null;
   }
@@ -113,6 +104,35 @@ function updateConnectionStatus(isConnected) {
   }
 }
 
+// Helper to calculate time remaining
+function getTimeRemaining(expiresAt) {
+  const diffMs = new Date(expiresAt) - new Date();
+  if (diffMs < 0) return '<span class="time-expired">Expired</span>';
+  
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  if (diffMins < 60) {
+    return `<span class="time-urgent">${diffMins}m remaining</span>`;
+  }
+  if (diffHours < 24) {
+    return `<span class="time-urgent">${diffHours}h remaining</span>`;
+  }
+  if (diffDays < 30) {
+    return `<span class="time-warning">${diffDays} days remaining</span>`;
+  }
+  
+  const months = Math.floor(diffDays / 30);
+  const remainingDays = diffDays % 30;
+  if (months < 12) {
+    return `<span class="time-normal">${months}mo ${remainingDays}d remaining</span>`;
+  }
+  
+  const years = Math.floor(months / 12);
+  return `<span class="time-normal">${years} year(s) remaining</span>`;
+}
+
 // Load Licenses
 async function loadLicenses() {
   const list = await supabaseRequest('licenses?select=*&order=created_at.desc');
@@ -129,7 +149,7 @@ function renderTable(records) {
   tbody.innerHTML = '';
 
   if (records.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px 0;">No licenses match the search filter.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 40px 0;">No licenses found matching your filter.</td></tr>`;
     return;
   }
 
@@ -145,11 +165,15 @@ function renderTable(records) {
       statusHtml = '<span class="status-badge status-active">● Active</span>';
     }
 
-    const expiryFormatted = new Date(license.expires_at).toLocaleDateString('en-US', {
+    const expiryFormatted = new Date(license.expires_at).toLocaleString('en-US', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
     });
+
+    const timeLeftHtml = getTimeRemaining(license.expires_at);
 
     const devices = license.devices || [];
     const deviceDisplay = `${devices.length} / ${license.max_devices}`;
@@ -159,17 +183,18 @@ function renderTable(records) {
       <td><span class="key-badge">${license.key_value}</span></td>
       <td>${statusHtml}</td>
       <td>${expiryFormatted}</td>
+      <td>${timeLeftHtml}</td>
       <td>${deviceDisplay}</td>
       <td>
         <div class="action-group">
-          <button class="btn-secondary" onclick="toggleActive('${license.id}', ${license.is_active})">
+          <button class="btn-secondary" onclick="toggleActive('\ ${license.id}\ ', ${license.is_active})">
             ${license.is_active ? 'Deactivate' : 'Activate'}
           </button>
-          <button class="btn-secondary" onclick="resetDevices('${license.id}')">Reset Devices</button>
-          <button class="btn-danger" onclick="deleteLicense('${license.id}', '${license.key_value}')">Delete</button>
+          <button class="btn-secondary" onclick="resetDevices('\ ${license.id}\ ')">Reset</button>
+          <button class="btn-danger" onclick="deleteLicense('\ ${license.id}\ ', '\ ${license.key_value}\ ')">Delete</button>
         </div>
       </td>
-    `;
+    `.replace(/\\\s/g, '').replace(/\s\s+/g, ' ');
     tbody.appendChild(tr);
   });
 }
@@ -282,7 +307,7 @@ async function deleteLicense(id, keyVal) {
   loadLicenses();
 }
 
-// Password Gate Check (Default Password: LovablePrime2026)
+// Password Gate Check
 const CORRECT_HASH = '8f204fdbc685236a374d5982e70c601df74de0e5e5e175474b9dfee2322df39f';
 
 async function sha256(message) {
@@ -304,18 +329,20 @@ async function checkGatePassword() {
       gate.style.display = 'none';
     }, 400);
     showToast('Dashboard unlocked!');
+    
+    // Auto load licenses on unlock
+    if (document.getElementById('dbKey').value) {
+      loadLicenses();
+    }
   } else {
     document.getElementById('gateError').textContent = 'Incorrect password. Access denied.';
   }
 }
 
-// Auto-run on load to check unlock status
-(function() {
-  if (sessionStorage.getItem('gate_unlocked') === 'true') {
-    // Hide gate immediately if already unlocked in this browser session
-    document.addEventListener('DOMContentLoaded', () => {
-      const gate = document.getElementById('loginGate');
-      if (gate) gate.style.display = 'none';
-    });
+// Logout Admin
+function logoutAdmin() {
+  if (confirm('Logout from Admin Portal?')) {
+    sessionStorage.removeItem('gate_unlocked');
+    window.location.reload();
   }
-})();
+}
