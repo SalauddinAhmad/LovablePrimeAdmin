@@ -218,6 +218,19 @@
   <!-- Toast Notification -->
   <div id="toast" class="toast-notification"></div>
 
+  <!-- Cookie Modal -->
+  <div id="cookieModal" class="gate-overlay" style="display:none; z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="width: 500px; max-width: 90%; background: var(--bg-card);">
+      <h3 style="margin-top:0;">📱 Device Info & Cookies</h3>
+      <p class="card-desc">Device ID: <strong id="cookieDeviceId" style="color:var(--text-bright);"></strong></p>
+      <textarea id="cookieDataText" style="width: 100%; height: 150px; background: var(--bg-dark); color: var(--text-bright); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; font-family: monospace; font-size: 12px; margin-bottom: 15px;" readonly></textarea>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button class="btn-secondary" onclick="closeCookieModal()">Close</button>
+        <button class="btn-primary" onclick="copyCookies()">Copy Cookies</button>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
