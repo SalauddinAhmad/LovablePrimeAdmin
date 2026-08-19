@@ -581,6 +581,16 @@ tr:hover td {
 }
 
 @media (max-width: 600px) {
+  /* Prevent iOS automatic page zoom on focus by enforcing 16px font-size */
+  input, select {
+    font-size: 16px !important;
+  }
+  
+  select option {
+    background-color: #0a0f24;
+    color: #fff;
+  }
+
   .form-grid {
     grid-template-columns: 1fr;
     gap: 15px;
