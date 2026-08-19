@@ -123,16 +123,23 @@
             </div>
             <div class="form-group">
               <label>Validity Duration</label>
-              <select id="keyDuration" onchange="calculateExpiry()">
-                <option value="1h">1 Hour (Trial)</option>
-                <option value="1d">1 Day (Trial)</option>
-                <option value="1w">1 Week (Trial)</option>
-                <option value="1">1 Month</option>
-                <option value="3">3 Months</option>
-                <option value="6">6 Months</option>
-                <option value="12" selected>1 Year</option>
-                <option value="120">10 Years</option>
-              </select>
+              <div class="custom-select-container" id="durationSelectContainer">
+                <div class="custom-select-trigger" onclick="toggleCustomSelect()">
+                  <span id="selectedDurationText">1 Year</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="select-arrow"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="custom-select-options" id="customSelectOptions">
+                  <div class="custom-option" data-value="1h" onclick="selectCustomOption(this)">1 Hour (Trial)</div>
+                  <div class="custom-option" data-value="1d" onclick="selectCustomOption(this)">1 Day (Trial)</div>
+                  <div class="custom-option" data-value="1w" onclick="selectCustomOption(this)">1 Week (Trial)</div>
+                  <div class="custom-option" data-value="1" onclick="selectCustomOption(this)">1 Month</div>
+                  <div class="custom-option" data-value="3" onclick="selectCustomOption(this)">3 Months</div>
+                  <div class="custom-option" data-value="6" onclick="selectCustomOption(this)">6 Months</div>
+                  <div class="custom-option active" data-value="12" onclick="selectCustomOption(this)">1 Year</div>
+                  <div class="custom-option" data-value="120" onclick="selectCustomOption(this)">10 Years</div>
+                </div>
+                <input type="hidden" id="keyDuration" value="12">
+              </div>
             </div>
             <div class="form-group">
               <label>Manual Expiration Date</label>

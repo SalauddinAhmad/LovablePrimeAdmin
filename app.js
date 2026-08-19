@@ -346,3 +346,37 @@ function logoutAdmin() {
     window.location.reload();
   }
 }
+
+// Custom Selector Actions
+function toggleCustomSelect() {
+  const container = document.getElementById('durationSelectContainer');
+  container.classList.toggle('open');
+  
+  // Auto-close when clicking anywhere else
+  const closeListener = (e) => {
+    if (!container.contains(e.target)) {
+      container.classList.remove('open');
+      document.removeEventListener('click', closeListener);
+    }
+  };
+  document.addEventListener('click', closeListener);
+}
+
+function selectCustomOption(element) {
+  const val = element.getAttribute('data-value');
+  const text = element.textContent;
+  
+  // Set hidden value and label
+  document.getElementById('keyDuration').value = val;
+  document.getElementById('selectedDurationText').textContent = text;
+  
+  // Toggle active class
+  document.querySelectorAll('.custom-option').forEach(opt => opt.classList.remove('active'));
+  element.classList.add('active');
+  
+  // Close container
+  document.getElementById('durationSelectContainer').classList.remove('open');
+  
+  // Recalculate Expiry Date
+  calculateExpiry();
+}
